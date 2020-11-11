@@ -1,5 +1,7 @@
 # Hands-On Network Programming with C
 
+## :warning: This fork aims to rewrite in zig all the examples from the book.
+
 <a href="https://www.amazon.com/exec/obidos/ASIN/1789349869/aoeu-20"><img src="https://handsonnetworkprogramming.com/processed_images/d68715e4b29b3b9f00.png" alt="Hands-On Network Programming with C" height="256px" align="right"></a>
 
 This is the code repository for [Hands-On Network Programming with C](https://www.amazon.com/exec/obidos/ASIN/1789349869/aoeu-20), written by Lewis Van Winkle and published by Packt.
