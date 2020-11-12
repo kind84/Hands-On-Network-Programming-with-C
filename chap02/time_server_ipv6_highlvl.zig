@@ -8,7 +8,7 @@ pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 
     print("Configuring local address...\n", .{});
-    const req_listen_addr = net.Address.parseIp4("127.0.0.1", 8080) catch unreachable;
+    const req_listen_addr = net.Address.parseIp6("::1", 8080) catch unreachable;
 
     var server = net.StreamServer.init(net.StreamServer.Options{});
     defer {
