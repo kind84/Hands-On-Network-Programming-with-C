@@ -25,6 +25,7 @@ pub fn main() !void {
     var client = try server.accept();
 
     print("Client is connected...\n", .{});
+    print("{}\n", .{client.address});
 
     print("Reading request...\n", .{});
     var request: [1024]u8 = undefined;

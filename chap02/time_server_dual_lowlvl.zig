@@ -32,6 +32,7 @@ pub fn main() !void {
     var sock_client = try os.accept(sock_listen, &accepted_addr.any, &addr_len, os.SOCK_CLOEXEC);
 
     print("Client is connected...\n", .{});
+    print("{}\n", .{accepted_addr});
 
     print("Reading request...\n", .{});
     var request: [1024]u8 = undefined;
