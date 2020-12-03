@@ -4,6 +4,7 @@ const print = std.debug.print;
 const net = std.net;
 const fmt = std.fmt;
 const mem = std.mem;
+const io = std.io;
 
 pub fn main() !void {
     var allocator = std.heap.page_allocator;
@@ -39,10 +40,13 @@ pub fn main() !void {
 
     print("Creating socket...\n", .{});
     const socket_peer = try os.socket(os.AF_INET, os.SOCK_STREAM, os.IPPROTO_TCP);
-    errdefer os.close(socket_peer);
+    defer {
+        print("Closing socket...\n", .{});
+        os.close(socket_peer);
+    }
 
     print("Connecting...\n", .{});
-    try os.connect(socket_peer, peer_address, peer_address.getOsSockLen());
+    try os.connect(socket_peer, &peer_address.any, peer_address.getOsSockLen());
 
     print("Connected...\n", .{});
     print("To send data, enter text followed by an enter.\n", .{});
@@ -65,11 +69,30 @@ pub fn main() !void {
         if (nevents == 0) continue;
 
         if ((pfd[0].revents & os.POLLIN) == os.POLLIN) {
-            // read bytes from stdin
+            var read: [4096]u8 = undefined;
+            const stdin = io.getStdIn();
+
+            const raw_input = stdin.reader().readUntilDelimiterOrEof(read[0..], '\n') catch |err| {
+                print("error: cannot read from STDIN: {}\n", .{err});
+                return;
+            } orelse return;
+            const input = try fmt.bufPrint(read[0..], "{}{}", .{ raw_input, "\n" });
+            print("Sending: {}", .{input});
+            var bytes_sent = os.send(socket_peer, input, 0);
+            print("Sent {} bytes.\n", .{bytes_sent});
         }
 
         if ((pfd[1].revents & os.POLLIN) == os.POLLIN) {
-            // read from connection
+            var read: [4096]u8 = undefined;
+            const bytes_received = try os.recv(socket_peer, read[0..], 0);
+            if (bytes_received < 1) {
+                print("Connection closed by peer.\n", .{});
+                break;
+            }
+            print("Received ({} bytes): {}\n", .{ bytes_received, read[0..bytes_received] });
         }
     }
+
+    print("Finished.\n", .{});
+    return;
 }
