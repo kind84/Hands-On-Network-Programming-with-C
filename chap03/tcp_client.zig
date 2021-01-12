@@ -27,11 +27,7 @@ pub fn main() !void {
     // take the IPv4 address by checking its size
     outer: for (addrs_list.addrs) |addr| {
         const bytes = @ptrCast(*const [4]u8, &addr.in.sa.addr);
-        var sum: u16 = 0;
-        for (bytes) |b| {
-            sum += b;
-        }
-        if (sum != 0) {
+        if (bytes.len > 0) {
             peer_address = addr;
             break :outer;
         }
@@ -53,7 +49,7 @@ pub fn main() !void {
 
     var pfd = [2]os.pollfd{
         os.pollfd{
-            .fd = 0,
+            .fd = 0, // stdin
             .events = os.POLLIN,
             .revents = undefined,
         },
@@ -76,8 +72,8 @@ pub fn main() !void {
                 print("error: cannot read from STDIN: {}\n", .{err});
                 return;
             } orelse return;
-            const input = try fmt.bufPrint(read[0..], "{}{}", .{ raw_input, "\n" });
-            print("Sending: {}", .{input});
+            const input = try fmt.bufPrint(read[0..], "{s}\n", .{raw_input});
+            print("Sending: {s}\n", .{raw_input});
             var bytes_sent = os.send(socket_peer, input, 0);
             print("Sent {} bytes.\n", .{bytes_sent});
         }
@@ -89,7 +85,7 @@ pub fn main() !void {
                 print("Connection closed by peer.\n", .{});
                 break;
             }
-            print("Received ({} bytes): {}\n", .{ bytes_received, read[0..bytes_received] });
+            print("Received ({} bytes): {s}", .{ bytes_received, read[0..bytes_received] });
         }
     }
 
